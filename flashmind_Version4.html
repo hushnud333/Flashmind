@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FlashMind - Study Better with Flashcards</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --indigo: #6366f1;
+  --indigo-dark: #4f46e5;
+  --purple: #8b5cf6;
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: linear-gradient(135deg, #f0f4ff 0%, #f5f0ff 50%, #fdf4ff 100%);
+  min-height: 100vh;
+  color: var(--slate-800);
+}
+
+nav {
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--slate-200);
+  position: sticky; top: 0; z-index: 100;
+  padding: 12px 20px;
+}
+.nav-inner {
+  max-width: 1100px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--indigo), var(--purple));
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 900; font-size: 16px;
+}
+.logo-text { font-weight: 900; font-size: 20px; }
+.nav-right { display: flex; align-items: center; gap: 12px; }
+.nav-btn {
+  padding: 8px 16px; border-radius: 10px; font-size: 13px; font-weight: 600;
+  border: none; cursor: pointer; transition: all .2s; background: transparent;
+  color: var(--slate-600);
+}
+.nav-btn:hover { background: var(--slate-100); }
+.nav-btn.active { background: #eef2ff; color: var(--indigo); }
+.lang-btn {
+  padding: 6px 12px; border-radius: 9px; font-size: 12px; font-weight: 700;
+  border: none; cursor: pointer; transition: all .2s; background: transparent; color: var(--slate-500);
+}
+.lang-btn.active { background: white; color: var(--indigo); }
+
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 20px; display: flex; gap: 28px; }
+@media(max-width:768px) { .container { flex-direction: column; padding: 20px 16px; } }
+
+.sidebar { width: 220px; flex-shrink: 0; display: flex; flex-direction: column; gap: 16px; }
+@media(max-width:768px) { .sidebar { display: none; } }
+.sidebar-card { background: white; border-radius: 20px; padding: 20px; border: 1px solid var(--slate-100); box-shadow: 0 2px 12px rgba(0,0,0,.05); }
+.sidebar-title { font-size: 11px; font-weight: 800; color: var(--slate-400); text-transform: uppercase; margin-bottom: 14px; }
+.subj-btn {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 10px 12px; border-radius: 12px; border: none;
+  font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s;
+  background: transparent; color: var(--slate-600); text-align: left; margin-bottom: 4px;
+}
+.subj-btn:hover { background: var(--slate-50); }
+.subj-btn.active { background: linear-gradient(135deg, var(--indigo), var(--purple)); color: white; }
+.subj-icon { font-size: 18px; }
+
+main { flex: 1; min-width: 0; }
+
+.hero {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed, #9333ea);
+  border-radius: 28px; padding: 36px; color: white; margin-bottom: 24px;
+  box-shadow: 0 12px 40px rgba(99,102,241,.35);
+}
+.hero-title { font-weight: 900; font-size: 32px; margin-bottom: 6px; }
+.hero-sub { color: rgba(255,255,255,.75); font-size: 14px; margin-bottom: 24px; }
+.hero-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.hero-chip {
+  padding: 7px 14px; background: rgba(255,255,255,.18); border-radius: 100px;
+  font-size: 12px; font-weight: 600; cursor: pointer; border: none; color: white;
+  transition: all .2s;
+}
+.hero-chip:hover { background: rgba(255,255,255,.28); }
+
+.gen-section {
+  background: white; border-radius: 20px; padding: 24px; margin-bottom: 24px;
+  border: 1px solid var(--slate-100); box-shadow: 0 2px 12px rgba(0,0,0,.05);
+}
+.gen-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 18px; }
+.gen-icon {
+  width: 40px; height: 40px; border-radius: 12px;
+  background: linear-gradient(135deg, var(--indigo), var(--purple));
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+}
+.gen-title { font-weight: 700; color: var(--slate-800); font-size: 15px; }
+.gen-desc { font-size: 12px; color: var(--slate-500); margin-top: 2px; }
+.gen-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.gen-input {
+  flex: 1; min-width: 200px; border: 1.5px solid var(--slate-200); border-radius: 12px;
+  padding: 11px 16px; font-size: 14px; outline: none; transition: all .2s;
+  color: var(--slate-700); background: var(--slate-50);
+}
+.gen-input:focus { border-color: var(--indigo); box-shadow: 0 0 0 3px rgba(99,102,241,.1); background: white; }
+.gen-btn {
+  padding: 11px 24px; border-radius: 12px; font-weight: 700; font-size: 13px;
+  background: linear-gradient(135deg, var(--indigo), var(--purple));
+  color: white; border: none; cursor: pointer; transition: all .2s; white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(99,102,241,.3);
+}
+.gen-btn:hover:not(:disabled) { transform: translateY(-2px); }
+.gen-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+.cards-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
+.cards-title { display: flex; align-items: center; gap: 10px; }
+.cards-title-text { font-weight: 800; font-size: 17px; color: var(--slate-800); }
+.badge {
+  background: #eef2ff; color: var(--indigo); font-size: 11px; font-weight: 700;
+  padding: 4px 12px; border-radius: 100px;
+}
+.cards-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.action-btn {
+  padding: 7px 14px; border-radius: 10px; font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all .2s; border: none;
+}
+.action-btn-primary { background: var(--indigo); color: white; }
+.action-btn-primary:hover { background: var(--indigo-dark); }
+.action-btn-ghost { background: transparent; border: 1px solid var(--slate-200); color: var(--slate-500); }
+.action-btn-ghost:hover { background: var(--slate-50); }
+.flip-hint { font-size: 12px; color: var(--slate-400); margin-bottom: 18px; }
+.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+
+.card-wrap { perspective: 1000px; height: 200px; cursor: pointer; }
+.card-inner {
+  position: relative; width: 100%; height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+.card-wrap.flipped .card-inner { transform: rotateY(180deg); }
+.card-face {
+  position: absolute; width: 100%; height: 100%;
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  border-radius: 16px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; padding: 20px; text-align: center;
+}
+.card-front {
+  background: white; border: 1px solid var(--slate-200);
+  box-shadow: 0 4px 16px rgba(0,0,0,.06);
+}
+.card-back {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  transform: rotateY(180deg);
+  box-shadow: 0 8px 24px rgba(99,102,241,.3);
+}
+.card-label { font-size: 10px; font-weight: 700; text-transform: uppercase; margin-bottom: 10px; }
+.card-front .card-label { color: var(--slate-400); }
+.card-back .card-label { color: rgba(255,255,255,.6); }
+.card-term { font-weight: 800; font-size: 18px; color: var(--slate-800); line-height: 1.4; }
+.card-def { font-size: 13px; font-weight: 500; color: white; line-height: 1.5; }
+
+.empty { text-align: center; padding: 60px 20px; color: var(--slate-400); }
+.empty-icon { font-size: 48px; margin-bottom: 12px; }
+.empty-text { font-size: 14px; }
+
+.quiz-wrap { background: white; border-radius: 28px; padding: 36px; box-shadow: 0 4px 24px rgba(0,0,0,.07); }
+.quiz-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+.quiz-back { background: none; border: none; font-size: 13px; color: var(--slate-500); cursor: pointer; display: flex; align-items: center; gap: 4px; font-weight: 600; }
+.quiz-back:hover { color: var(--slate-700); }
+.quiz-meta { display: flex; align-items: center; gap: 12px; }
+.quiz-counter { font-size: 13px; color: var(--slate-500); font-weight: 600; }
+.score-pill {
+  display: flex; align-items: center; gap: 6px;
+  background: #eef2ff; border: 1px solid #c7d2fe;
+  border-radius: 100px; padding: 6px 14px;
+}
+.score-num { font-weight: 800; color: var(--indigo); font-size: 14px; }
+.progress-bar { width: 100%; height: 6px; background: var(--slate-100); border-radius: 100px; margin-bottom: 28px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--indigo), var(--purple)); border-radius: 100px; transition: width 0.5s ease; }
+.quiz-q-card {
+  background: linear-gradient(135deg, #eef2ff, #f5f3ff);
+  border: 1px solid #c7d2fe; border-radius: 20px; padding: 24px;
+  text-align: center; margin-bottom: 24px;
+}
+.quiz-q-label { font-size: 11px; font-weight: 700; color: var(--indigo); text-transform: uppercase; margin-bottom: 10px; }
+.quiz-q-text { font-size: 16px; font-weight: 600; color: var(--slate-800); line-height: 1.6; }
+.options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media(max-width:500px) { .options-grid { grid-template-columns: 1fr; } }
+.opt-btn {
+  padding: 14px 16px; border-radius: 14px; font-size: 13px; font-weight: 600;
+  border: 1.5px solid var(--slate-200); background: white; color: var(--slate-700);
+  cursor: pointer; transition: all .2s; text-align: left; line-height: 1.4;
+}
+.opt-btn:hover:not(:disabled) { border-color: var(--indigo); background: #eef2ff; }
+.opt-btn.correct { border-color: #10b981; background: #ecfdf5; color: #065f46; }
+.opt-btn.wrong { border-color: #ef4444; background: #fef2f2; color: #991b1b; }
+.opt-btn.dim { opacity: 0.5; }
+.opt-btn:disabled { cursor: default; }
+.opt-letter { color: var(--slate-400); margin-right: 6px; font-size: 12px; font-weight: 700; }
+.feedback {
+  margin-top: 14px; padding: 12px 16px; border-radius: 12px;
+  font-weight: 600; font-size: 13px; text-align: center;
+}
+.feedback.correct { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+.feedback.wrong { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+.next-btn {
+  width: 100%; margin-top: 14px; padding: 14px;
+  background: linear-gradient(135deg, var(--indigo), var(--purple));
+  color: white; font-weight: 700; font-size: 14px;
+  border: none; border-radius: 14px; cursor: pointer; transition: all .2s;
+}
+.next-btn:hover { transform: translateY(-2px); }
+
+.results { text-align: center; padding: 20px 0; }
+.result-emoji { font-size: 64px; margin-bottom: 16px; }
+.result-title { font-weight: 900; font-size: 22px; color: var(--slate-800); margin-bottom: 8px; }
+.result-score { font-weight: 900; font-size: 56px; color: var(--indigo); line-height: 1; margin-bottom: 6px; }
+.result-pct { color: var(--slate-500); font-size: 14px; margin-bottom: 6px; font-weight: 600; }
+.result-msg { font-size: 16px; color: var(--slate-600); margin-bottom: 32px; line-height: 1.6; }
+.result-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.result-btn { padding: 12px 24px; border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; transition: all .2s; border: none; }
+.result-btn-ghost { background: white; border: 1.5px solid var(--slate-200); color: var(--slate-600); }
+.result-btn-ghost:hover { background: var(--slate-50); }
+.result-btn-primary { background: linear-gradient(135deg, var(--indigo), var(--purple)); color: white; }
+
+.subj-grid { display: none; }
+@media(max-width:768px) {
+  .subj-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px; }
+}
+.subj-grid-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 12px 8px; background: white; border: 1.5px solid var(--slate-200);
+  border-radius: 14px; font-size: 11px; font-weight: 700; color: var(--slate-600);
+  cursor: pointer; transition: all .2s;
+}
+.subj-grid-btn:hover { background: var(--slate-50); }
+.subj-grid-btn.active { border-color: var(--indigo); background: #eef2ff; color: var(--indigo); }
+.subj-grid-icon { font-size: 22px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo">
+      <div class="logo-icon">F</div>
+      <span class="logo-text">FlashMind</span>
+    </div>
+    <div class="nav-right">
+      <button class="nav-btn active" id="navHome" onclick="showView('home')">Home</button>
+      <button class="nav-btn" id="navQuiz" onclick="showView('quiz')" style="display:none">Quiz</button>
+      <div style="display:flex; gap:2px; background: var(--slate-100); border-radius: 12px; padding: 3px;">
+        <button class="lang-btn active" id="btnEN" onclick="setLang('en')">EN</button>
+        <button class="lang-btn" id="btnKO" onclick="setLang('ko')">한국어</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <aside class="sidebar">
+    <div class="sidebar-card">
+      <div class="sidebar-title">SUBJECTS</div>
+      <button class="subj-btn" data-subj="english" onclick="loadSubject('english')"><span class="subj-icon">📖</span>English</button>
+      <button class="subj-btn" data-subj="korean" onclick="loadSubject('korean')"><span class="subj-icon">🇰🇷</span>Korean</button>
+      <button class="subj-btn" data-subj="math" onclick="loadSubject('math')"><span class="subj-icon">📐</span>Math</button>
+      <button class="subj-btn" data-subj="science" onclick="loadSubject('science')"><span class="subj-icon">🔬</span>Science</button>
+      <button class="subj-btn" data-subj="history" onclick="loadSubject('history')"><span class="subj-icon">🏛️</span>History</button>
+    </div>
+  </aside>
+
+  <main>
+    <div class="subj-grid">
+      <button class="subj-grid-btn" data-subj="english" onclick="loadSubject('english')"><span class="subj-grid-icon">📖</span>English</button>
+      <button class="subj-grid-btn" data-subj="korean" onclick="loadSubject('korean')"><span class="subj-grid-icon">🇰🇷</span>Korean</button>
+      <button class="subj-grid-btn" data-subj="math" onclick="loadSubject('math')"><span class="subj-grid-icon">📐</span>Math</button>
+      <button class="subj-grid-btn" data-subj="science" onclick="loadSubject('science')"><span class="subj-grid-icon">🔬</span>Science</button>
+      <button class="subj-grid-btn" data-subj="history" onclick="loadSubject('history')"><span class="subj-grid-icon">🏛️</span>History</button>
+    </div>
+
+    <div id="viewHome">
+      <div class="hero" id="heroSection">
+        <div class="hero-title">FlashMind</div>
+        <div class="hero-sub">Learn Smarter, Remember Forever</div>
+        <div class="hero-chips">
+          <button class="hero-chip" onclick="loadSubject('english')">📖 English</button>
+          <button class="hero-chip" onclick="loadSubject('korean')">🇰🇷 Korean</button>
+          <button class="hero-chip" onclick="loadSubject('math')">📐 Math</button>
+          <button class="hero-chip" onclick="loadSubject('science')">🔬 Science</button>
+          <button class="hero-chip" onclick="loadSubject('history')">🏛️ History</button>
+        </div>
+      </div>
+
+      <div class="gen-section">
+        <div class="gen-header">
+          <div class="gen-icon">✨</div>
+          <div>
+            <div class="gen-title">Generate Custom Flashcards</div>
+            <div class="gen-desc">Create 50 instant flashcards on any topic</div>
+          </div>
+        </div>
+        <div class="gen-row">
+          <input class="gen-input" id="topicInput" placeholder="Enter topic (e.g., Biology, French Verbs)" onkeydown="if(event.key==='Enter')generateCards()"/>
+          <button class="gen-btn" id="genBtn" onclick="generateCards()">✨ Generate</button>
+        </div>
+      </div>
+
+      <div id="cardsSection" style="display:none">
+        <div class="cards-header">
+          <div class="cards-title">
+            <span id="cardsTitleIcon" style="font-size:22px"></span>
+            <span class="cards-title-text" id="cardsTitleText">Flashcards</span>
+            <span class="badge" id="cardsBadge">50 cards</span>
+          </div>
+          <div class="cards-actions">
+            <button class="action-btn action-btn-primary" onclick="showView('quiz')">🏆 Start Quiz</button>
+            <button class="action-btn action-btn-ghost" onclick="clearCards()">Clear</button>
+          </div>
+        </div>
+        <div class="flip-hint">↻ Click card to flip</div>
+        <div class="cards-grid" id="cardsGrid"></div>
+      </div>
+
+      <div class="empty" id="emptyState">
+        <div class="empty-icon">🃏</div>
+        <div class="empty-text">No flashcards yet. Pick a subject or generate custom ones!</div>
+      </div>
+    </div>
+
+    <div id="viewQuiz" style="display:none">
+      <div class="quiz-wrap">
+        <div id="quizContent"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const DECKS = {
+  english: [
+    {term:"Ephemeral",definition:"Lasting for a very short time"},
+    {term:"Eloquent",definition:"Fluent and persuasive in speaking"},
+    {term:"Benevolent",definition:"Kind and charitable"},
+    {term:"Meticulous",definition:"Paying great attention to detail"},
+    {term:"Tenacious",definition:"Holding firm; persistent"},
+    {term:"Ambiguous",definition:"Open to more than one interpretation"},
+    {term:"Pragmatic",definition:"Dealing with things sensibly"},
+    {term:"Diligent",definition:"Having careful attention to work"},
+    {term:"Resilient",definition:"Able to recover quickly"},
+    {term:"Cogent",definition:"Clear, logical, and convincing"},
+    {term:"Serene",definition:"Calm and peaceful"},
+    {term:"Verbose",definition:"Using more words than necessary"},
+    {term:"Gregarious",definition:"Fond of company and crowds"},
+    {term:"Oscillate",definition:"Move back and forth"},
+    {term:"Ubiquitous",definition:"Present everywhere"},
+    {term:"Sagacious",definition:"Having keen insight"},
+    {term:"Arduous",definition:"Difficult and tiring"},
+    {term:"Apathetic",definition:"Lacking interest or concern"},
+    {term:"Zealous",definition:"Great energy or enthusiasm"},
+    {term:"Fortuitous",definition:"Happening by lucky chance"},
+    {term:"Candid",definition:"Truthful and straightforward"},
+    {term:"Petulant",definition:"Childishly sulky"},
+    {term:"Aesthetic",definition:"Concerning beauty"},
+    {term:"Tacit",definition:"Understood without being said"},
+    {term:"Conundrum",definition:"A confusing problem"},
+    {term:"Perspicacious",definition:"Having keen understanding"},
+    {term:"Obfuscate",definition:"Make unclear or hard to understand"},
+    {term:"Sanguine",definition:"Optimistic about the future"},
+    {term:"Pedantic",definition:"Excessively concerned with details"},
+    {term:"Loquacious",definition:"Very talkative"},
+    {term:"Melancholy",definition:"Thoughtfully sad"},
+    {term:"Turbid",definition:"Not clear; cloudy"},
+    {term:"Nefarious",definition:"Wicked; criminal"},
+    {term:"Propitious",definition:"Giving good chance of success"},
+    {term:"Pallid",definition:"Pale in appearance"},
+    {term:"Limpid",definition:"Clear and easy to understand"},
+    {term:"Prudent",definition:"Acting with care"},
+    {term:"Extraneous",definition:"Irrelevant or unrelated"},
+    {term:"Penance",definition:"Punishment as repentance"},
+    {term:"Querulous",definition:"Complaining habitually"},
+    {term:"Erstwhile",definition:"Former or previously"},
+    {term:"Commodious",definition:"Spacious and comfortable"},
+    {term:"Furtive",definition:"Secretive; sneaky"},
+    {term:"Garrulous",definition:"Excessively talkative"},
+    {term:"Hedonistic",definition:"Devoted to pleasure"},
+    {term:"Immutable",definition:"Not able to change"},
+    {term:"Jocular",definition:"Humorous; joking"},
+    {term:"Labyrinth",definition:"Complex maze-like structure"},
+    {term:"Magnanimous",definition:"Generous and noble"},
+  ],
+  korean: [
+    {term:"먹다",definition:"To eat"},
+    {term:"가다",definition:"To go"},
+    {term:"오다",definition:"To come"},
+    {term:"하다",definition:"To do"},
+    {term:"보다",definition:"To see"},
+    {term:"알다",definition:"To know"},
+    {term:"살다",definition:"To live"},
+    {term:"주다",definition:"To give"},
+    {term:"받다",definition:"To receive"},
+    {term:"배우다",definition:"To learn"},
+    {term:"말하다",definition:"To speak"},
+    {term:"쓰다",definition:"To write"},
+    {term:"읽다",definition:"To read"},
+    {term:"듣다",definition:"To listen"},
+    {term:"생각하다",definition:"To think"},
+    {term:"사다",definition:"To buy"},
+    {term:"팔다",definition:"To sell"},
+    {term:"좋아하다",definition:"To like"},
+    {term:"싫어하다",definition:"To dislike"},
+    {term:"사랑하다",definition:"To love"},
+    {term:"미워하다",definition:"To hate"},
+    {term:"웃다",definition:"To laugh"},
+    {term:"울다",definition:"To cry"},
+    {term:"자다",definition:"To sleep"},
+    {term:"일어나다",definition:"To wake up"},
+    {term:"앉다",definition:"To sit"},
+    {term:"서다",definition:"To stand"},
+    {term:"걷다",definition:"To walk"},
+    {term:"뛰다",definition:"To run"},
+    {term:"춤추다",definition:"To dance"},
+    {term:"노래하다",definition:"To sing"},
+    {term:"그리다",definition:"To draw"},
+    {term:"만들다",definition:"To make"},
+    {term:"부르다",definition:"To call"},
+    {term:"안다",definition:"To hold"},
+    {term:"떨어지다",definition:"To fall"},
+    {term:"올라가다",definition:"To go up"},
+    {term:"내려가다",definition:"To go down"},
+    {term:"들어가다",definition:"To enter"},
+    {term:"나오다",definition:"To come out"},
+    {term:"머물다",definition:"To stay"},
+    {term:"떠나다",definition:"To leave"},
+    {term:"잊다",definition:"To forget"},
+    {term:"기억하다",definition:"To remember"},
+    {term:"찾다",definition:"To find"},
+    {term:"잃다",definition:"To lose"},
+    {term:"숨다",definition:"To hide"},
+    {term:"보여주다",definition:"To show"},
+    {term:"도와주다",definition:"To help"},
+    {term:"필요하다",definition:"To need"},
+  ],
+  math: [
+    {term:"Derivative",definition:"Rate of change of function"},
+    {term:"Integral",definition:"Area under curve"},
+    {term:"Prime",definition:"Number divisible only by 1 and itself"},
+    {term:"Pythagorean",definition:"a² + b² = c²"},
+    {term:"Matrix",definition:"Rectangular array of numbers"},
+    {term:"Logarithm",definition:"Inverse of exponential"},
+    {term:"Vector",definition:"Magnitude and direction"},
+    {term:"Permutation",definition:"Ordered arrangement"},
+    {term:"Asymptote",definition:"Line curve approaches"},
+    {term:"Quadratic",definition:"Degree 2 polynomial"},
+    {term:"Polynomial",definition:"Sum of terms"},
+    {term:"Factorial",definition:"Product of integers ≤ n"},
+    {term:"Combination",definition:"Unordered selection"},
+    {term:"Probability",definition:"Chance of event"},
+    {term:"Mean",definition:"Average value"},
+    {term:"Median",definition:"Middle value"},
+    {term:"Mode",definition:"Most frequent value"},
+    {term:"Standard Deviation",definition:"Spread of data"},
+    {term:"Variance",definition:"Square of deviation"},
+    {term:"Limit",definition:"Value approached"},
+    {term:"Continuity",definition:"No breaks in function"},
+    {term:"Tangent",definition:"Line touching curve"},
+    {term:"Secant",definition:"Line through two points"},
+    {term:"Inflection",definition:"Concavity change point"},
+    {term:"Concave Up",definition:"Opens upward"},
+    {term:"Concave Down",definition:"Opens downward"},
+    {term:"Critical",definition:"Where derivative = 0"},
+    {term:"Maximum",definition:"Highest point"},
+    {term:"Minimum",definition:"Lowest point"},
+    {term:"Exponent",definition:"Power of number"},
+    {term:"Radical",definition:"Root of number"},
+    {term:"Rational",definition:"Expressible as ratio"},
+    {term:"Irrational",definition:"Non-repeating decimal"},
+    {term:"Real",definition:"On number line"},
+    {term:"Complex",definition:"Real + imaginary parts"},
+    {term:"Imaginary",definition:"i² = -1"},
+    {term:"Function",definition:"Input to output mapping"},
+    {term:"Domain",definition:"Possible inputs"},
+    {term:"Range",definition:"Possible outputs"},
+    {term:"Inverse",definition:"Reverses a function"},
+    {term:"Composition",definition:"f(g(x))"},
+    {term:"Even",definition:"f(-x) = f(x)"},
+    {term:"Odd",definition:"f(-x) = -f(x)"},
+    {term:"Sine",definition:"Opposite/hypotenuse"},
+    {term:"Cosine",definition:"Adjacent/hypotenuse"},
+    {term:"Tangent",definition:"Opposite/adjacent"},
+    {term:"Radian",definition:"Angle measure"},
+    {term:"Degree",definition:"1/360 rotation"},
+    {term:"Identity",definition:"Always true equation"},
+  ],
+  science: [
+    {term:"Photosynthesis",definition:"Plants make glucose from sunlight"},
+    {term:"Mitosis",definition:"Cell division creating identical cells"},
+    {term:"Newton's 2nd",definition:"F = ma"},
+    {term:"Osmosis",definition:"Water through membrane"},
+    {term:"DNA",definition:"Genetic code molecule"},
+    {term:"Entropy",definition:"Disorder measure"},
+    {term:"Catalyst",definition:"Speeds reaction"},
+    {term:"Atom",definition:"Smallest matter unit"},
+    {term:"Evolution",definition:"Population change"},
+    {term:"Kinetic",definition:"Motion energy"},
+    {term:"Potential",definition:"Stored energy"},
+    {term:"Force",definition:"Push or pull"},
+    {term:"Gravity",definition:"Attraction force"},
+    {term:"Velocity",definition:"Speed direction"},
+    {term:"Acceleration",definition:"Velocity change"},
+    {term:"Momentum",definition:"Mass × velocity"},
+    {term:"Friction",definition:"Motion resistance"},
+    {term:"Work",definition:"Force distance"},
+    {term:"Power",definition:"Work rate"},
+    {term:"Pressure",definition:"Force per area"},
+    {term:"Wave",definition:"Disturbance travel"},
+    {term:"Frequency",definition:"Cycles per time"},
+    {term:"Wavelength",definition:"Peak distance"},
+    {term:"Refraction",definition:"Light bending"},
+    {term:"Reflection",definition:"Light bouncing"},
+    {term:"EM Spectrum",definition:"All EM radiation"},
+    {term:"pH Scale",definition:"Acidity measure"},
+    {term:"Acid",definition:"pH < 7"},
+    {term:"Base",definition:"pH > 7"},
+    {term:"Oxidation",definition:"Electron loss"},
+    {term:"Reduction",definition:"Electron gain"},
+    {term:"Equilibrium",definition:"Balanced reactions"},
+    {term:"Exothermic",definition:"Heat releasing"},
+    {term:"Endothermic",definition:"Heat absorbing"},
+    {term:"Thermodynamics",definition:"Heat energy"},
+    {term:"Boiling",definition:"Liquid to gas"},
+    {term:"Melting",definition:"Solid to liquid"},
+    {term:"Molar",definition:"Substance amount"},
+    {term:"Mole",definition:"6.022×10²³"},
+    {term:"Protein",definition:"Amino acid chain"},
+    {term:"Carbohydrate",definition:"Sugar molecule"},
+    {term:"Lipid",definition:"Fat molecule"},
+    {term:"Enzyme",definition:"Reaction catalyst"},
+    {term:"Respiration",definition:"Energy breakdown"},
+    {term:"Mitochondria",definition:"Energy factory"},
+    {term:"Chloroplast",definition:"Photosynthesis"},
+    {term:"Nucleus",definition:"DNA container"},
+    {term:"Metabolism",definition:"Life chemistry"},
+    {term:"Mutation",definition:"Gene change"},
+  ],
+  history: [
+    {term:"Renaissance",definition:"14th-17th c. revival"},
+    {term:"Industrial",definition:"Machine manufacturing"},
+    {term:"Cold War",definition:"USA-USSR tension"},
+    {term:"French Revolution",definition:"1789 upheaval"},
+    {term:"Silk Road",definition:"Trade network"},
+    {term:"Colonialism",definition:"Territory control"},
+    {term:"World War II",definition:"1939-1945 conflict"},
+    {term:"Enlightenment",definition:"Reason movement"},
+    {term:"Magna Carta",definition:"1215 charter"},
+    {term:"Decolonization",definition:"Independence gains"},
+    {term:"Ancient Rome",definition:"Classical empire"},
+    {term:"Medieval",definition:"Middle Ages"},
+    {term:"Byzantine",definition:"Eastern Rome"},
+    {term:"Ottoman",definition:"Turkish empire"},
+    {term:"Mongol",definition:"Largest empire"},
+    {term:"Dynasties",definition:"Ruling families"},
+    {term:"Egypt",definition:"Nile civilization"},
+    {term:"Greece",definition:"Democracy birth"},
+    {term:"Feudalism",definition:"Hierarchy system"},
+    {term:"Black Death",definition:"Plague pandemic"},
+    {term:"Art",definition:"Creative works"},
+    {term:"Luther",definition:"Reformation leader"},
+    {term:"Exploration",definition:"New lands discovery"},
+    {term:"Columbus",definition:"Americas explorer"},
+    {term:"Revolution",definition:"Political upheaval"},
+    {term:"Declaration",definition:"Independence statement"},
+    {term:"Constitution",definition:"Governing document"},
+    {term:"Civil War",definition:"Internal conflict"},
+    {term:"Abolition",definition:"Slavery ending"},
+    {term:"WWI",definition:"1914-1918 war"},
+    {term:"Versailles",definition:"1919 treaty"},
+    {term:"Depression",definition:"Economic crisis"},
+    {term:"Hitler",definition:"Nazi leader"},
+    {term:"Holocaust",definition:"Genocide event"},
+    {term:"Pearl Harbor",definition:"1941 attack"},
+    {term:"D-Day",definition:"1944 invasion"},
+    {term:"Atomic",definition:"Nuclear weapons"},
+    {term:"Korea",definition:"1950-1953 war"},
+    {term:"Vietnam",definition:"1955-1975 war"},
+    {term:"Civil Rights",definition:"Equality movement"},
+    {term:"MLK",definition:"Rights leader"},
+    {term:"Apartheid",definition:"Racial separation"},
+    {term:"Mandela",definition:"Anti-apartheid hero"},
+    {term:"Soviet",definition:"USSR collapse"},
+    {term:"Berlin Wall",definition:"Division symbol"},
+    {term:"Missile Crisis",definition:"1962 nuclear standoff"},
+    {term:"Moon Landing",definition:"1969 achievement"},
+    {term:"911",definition:"2001 attacks"},
+    {term:"Brexit",definition:"UK EU exit"},
+  ]
+};
+
+let lang = 'en';
+let currentCards = [];
+let activeSubject = null;
+let currentView = 'home';
+let quizCards = [], quizIndex = 0, quizScore = 0, quizOptions = [], quizSelected = null, quizFeedback = null;
+
+function setLang(l){
+  lang = l;
+  document.getElementById('btnEN').classList.toggle('active', l==='en');
+  document.getElementById('btnKO').classList.toggle('active', l==='ko');
+}
+
+function showView(v){
+  currentView = v;
+  document.getElementById('viewHome').style.display = v==='home'?'block':'none';
+  document.getElementById('viewQuiz').style.display = v==='quiz'?'block':'none';
+  document.getElementById('navHome').classList.toggle('active', v==='home');
+  document.getElementById('navQuiz').classList.toggle('active', v==='quiz');
+  if(v==='quiz'){
+    if(currentCards.length===0){ showView('home'); return; }
+    startQuiz();
+    renderQuiz();
+  }
+}
+
+function loadSubject(subj){
+  activeSubject = subj;
+  currentCards = DECKS[subj].map(c=>({...c}));
+  document.querySelectorAll('.subj-btn,.subj-grid-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.subj===subj);
+  });
+  const titles = {english:'English', korean:'Korean', math:'Math', science:'Science', history:'History'};
+  const icons = {english:'📖', korean:'🇰🇷', math:'📐', science:'🔬', history:'🏛️'};
+  showCards(titles[subj], icons[subj]);
+  document.getElementById('heroSection').style.display='none';
+  document.getElementById('topicInput').value = '';
+}
+
+function showCards(title, icon){
+  document.getElementById('cardsSection').style.display='block';
+  document.getElementById('emptyState').style.display='none';
+  document.getElementById('cardsTitleText').textContent = title;
+  document.getElementById('cardsTitleIcon').textContent = icon||'';
+  document.getElementById('cardsBadge').textContent = currentCards.length+' cards';
+  document.getElementById('navQuiz').style.display='inline-block';
+  renderCards();
+}
+
+function renderCards(){
+  const grid = document.getElementById('cardsGrid');
+  grid.innerHTML = '';
+  currentCards.forEach((card,i)=>{
+    const wrap = document.createElement('div');
+    wrap.className = 'card-wrap';
+    wrap.onclick = ()=>{ wrap.classList.toggle('flipped'); };
+    wrap.innerHTML = `
+      <div class="card-inner">
+        <div class="card-face card-front">
+          <div class="card-label">TERM</div>
+          <div class="card-term">${card.term}</div>
+        </div>
+        <div class="card-face card-back">
+          <div class="card-label">DEFINITION</div>
+          <div class="card-def">${card.definition}</div>
+        </div>
+      </div>`;
+    grid.appendChild(wrap);
+  });
+}
+
+function clearCards(){
+  currentCards = []; activeSubject = null;
+  document.getElementById('cardsSection').style.display='none';
+  document.getElementById('emptyState').style.display='block';
+  document.getElementById('navQuiz').style.display='none';
+  document.getElementById('heroSection').style.display='block';
+  document.querySelectorAll('.subj-btn,.subj-grid-btn').forEach(b=>b.classList.remove('active'));
+}
+
+function generateCards(){
+  const topic = document.getElementById('topicInput').value.trim();
+  if(!topic) return;
+  const btn = document.getElementById('genBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Generating...';
+  setTimeout(()=>{
+    const simulated = generateSimulatedCards(topic, 50);
+    currentCards = simulated;
+    activeSubject = null;
+    document.querySelectorAll('.subj-btn,.subj-grid-btn').forEach(b=>b.classList.remove('active'));
+    showCards(topic, '✨');
+    document.getElementById('heroSection').style.display='none';
+    btn.disabled = false;
+    btn.textContent = '✨ Generate';
+  }, 1500);
+}
+
+function generateSimulatedCards(topic, count){
+  const cards = [];
+  const adjectives = ['Basic', 'Advanced', 'Important', 'Key', 'Essential', 'Main', 'Primary', 'Secondary', 'Complex', 'Simple'];
+  const verbs = ['Define', 'Explain', 'Describe', 'List', 'Compare', 'Analyze', 'Identify', 'State'];
+  
+  for(let i = 1; i <= count; i++){
+    const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+    const verb = verbs[Math.floor(Math.random() * verbs.length)];
+    cards.push({
+      term: `${adj} ${topic} Concept ${i}`,
+      definition: `${verb} the key aspects and important details of ${topic} concept number ${i} in the context of learning.`
+    });
+  }
+  return cards;
+}
+
+function startQuiz(){
+  quizCards = [...currentCards].sort(()=>Math.random()-.5);
+  quizIndex=0; quizScore=0; quizSelected=null; quizFeedback=null;
+  quizOptions = makeOptions(0);
+}
+
+function makeOptions(idx){
+  const correct = quizCards[idx];
+  let pool = quizCards.filter((_,i)=>i!==idx);
+  let opts = [correct];
+  while(opts.length<4 && pool.length>0){
+    const r=Math.floor(Math.random()*pool.length);
+    opts.push(pool.splice(r,1)[0]);
+  }
+  return opts.sort(()=>Math.random()-.5);
+}
+
+function renderQuiz(){
+  const el = document.getElementById('quizContent');
+  if(quizIndex>=quizCards.length){
+    renderResults(el); return;
+  }
+  const current = quizCards[quizIndex];
+  const pct = Math.round((quizIndex/quizCards.length)*100);
+  const letters = ['A','B','C','D'];
+  let optHTML = quizOptions.map((opt,i)=>{
+    let cls = 'opt-btn';
+    if(quizSelected){
+      if(opt.term===current.term) cls+=' correct';
+      else if(opt.term===quizSelected) cls+=' wrong';
+      else cls+=' dim';
+    }
+    return `<button class="${cls}" ${quizSelected?'disabled':''} onclick="selectOption('${opt.term.replace(/'/g,"\\'")}')">
+      <span class="opt-letter">${letters[i]}</span>${opt.term}
+    </button>`;
+  }).join('');
+
+  let feedbackHTML = '';
+  if(quizFeedback){
+    feedbackHTML = `<div class="feedback ${quizFeedback==='correct'?'correct':'wrong'}">${quizFeedback==='correct'?'✓ Correct!':'✗ Wrong!'}</div>`;
+  }
+  let nextHTML = '';
+  if(quizSelected){
+    const isLast = quizIndex+1>=quizCards.length;
+    nextHTML = `<button class="next-btn" onclick="nextQuestion()">${isLast?'Finish':'Next →'}</button>`;
+  }
+
+  el.innerHTML = `
+    <div class="quiz-top">
+      <button class="quiz-back" onclick="showView('home')">← Back</button>
+      <div class="quiz-meta">
+        <span class="quiz-counter">Question ${quizIndex+1} of ${quizCards.length}</span>
+        <div class="score-pill">⭐ <span class="score-num">${quizScore}</span></div>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <div class="quiz-q-card">
+      <div class="quiz-q-label">DEFINITION</div>
+      <div class="quiz-q-text">${current.definition}</div>
+    </div>
+    <div class="options-grid">${optHTML}</div>
+    ${feedbackHTML}
+    ${nextHTML}
+  `;
+}
+
+function selectOption(term){
+  if(quizSelected) return;
+  quizSelected = term;
+  const current = quizCards[quizIndex];
+  quizFeedback = term===current.term?'correct':'wrong';
+  if(quizFeedback==='correct') quizScore+=10;
+  renderQuiz();
+}
+
+function nextQuestion(){
+  quizIndex++;
+  if(quizIndex<quizCards.length){
+    quizOptions = makeOptions(quizIndex);
+    quizSelected = null; quizFeedback = null;
+  }
+  renderQuiz();
+}
+
+function renderResults(el){
+  const total = quizCards.length*10;
+  const pct = Math.round((quizScore/total)*100);
+  const emoji = pct>=80?'🎉':pct>=50?'👍':'💪';
+  const msg = pct>=80?'Excellent!':pct>=50?'Good Job!':'Keep Practicing!';
+  el.innerHTML = `
+    <div class="results">
+      <div class="result-emoji">${emoji}</div>
+      <div class="result-title">Final Score</div>
+      <div class="result-score">${quizScore}</div>
+      <div class="result-pct">${pct}% Accuracy</div>
+      <div class="result-msg">${msg}</div>
+      <div class="result-btns">
+        <button class="result-btn result-btn-ghost" onclick="showView('home')">← Back Home</button>
+        <button class="result-btn result-btn-primary" onclick="startQuiz();renderQuiz()">↻ Try Again</button>
+      </div>
+    </div>
+  `;
+}
+</script>
+</body>
+</html>
