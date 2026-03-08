@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FlashMind - Pro Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --primary: #6366f1;
+  --bg-gradient: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%);
+  --english: #4f46e5;
+  --math: #f59e0b;
+  --science: #10b981;
+  --custom: #ec4899;
+  --slate-800: #1e293b;
+  --slate-500: #64748b;
+  --slate-400: #94a3b8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--bg-gradient);
+  min-height: 100vh; color: var(--slate-800);
+  display: flex; flex-direction: column;
+}
+
+/* Welcome Screen */
+#welcome-screen {
+  position: fixed; inset: 0; background: white; z-index: 1000;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 20px;
+}
+.welcome-logo {
+  width: 100px; height: 100px; background: linear-gradient(135deg, var(--primary), #a855f7);
+  border-radius: 30px; color: white; font-size: 50px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; margin-bottom: 24px;
+  box-shadow: 0 20px 40px rgba(99,102,241,0.3);
+}
+.start-btn {
+  padding: 18px 48px; font-size: 18px; font-weight: 700; color: white;
+  background: var(--slate-800); border: none; border-radius: 20px; cursor: pointer;
+  transition: 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+.start-btn:active { transform: scale(0.95); }
+
+/* Navigation */
+nav {
+  background: rgba(255,255,255,0.8); backdrop-filter: blur(15px);
+  padding: 15px 20px; position: sticky; top: 0; z-index: 100;
+}
+.nav-inner { max-width: 600px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+
+.container { max-width: 600px; margin: 0 auto; padding: 20px; flex: 1; display: none; width: 100%; }
+
+/* Hero Card */
+.hero {
+  background: var(--primary);
+  border-radius: 28px; padding: 35px 25px; color: white; margin-bottom: 25px;
+  text-align: center; transition: background 0.5s ease;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+}
+
+/* Input Section */
+.gen-section {
+  background: white; border-radius: 24px; padding: 20px; margin-bottom: 25px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.05);
+}
+.gen-row { display: flex; flex-direction: column; gap: 12px; }
+.gen-input { 
+  padding: 15px; border-radius: 16px; border: 2px solid #f1f5f9; 
+  outline: none; font-size: 16px; transition: 0.2s; width: 100%;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.gen-input:focus { border-color: var(--primary); background: #f8faff; }
+.save-btn { 
+  padding: 15px; border-radius: 16px; background: var(--slate-800); 
+  color: white; border: none; font-weight: 700; cursor: pointer; font-size: 16px;
+  font-family: 'Plus Jakarta Sans', sans-serif; transition: 0.2s;
+}
+.save-btn:active { transform: scale(0.97); }
+
+/* Cards Grid */
+.cards-grid { 
+  display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding-bottom: 130px; 
+}
+.card-wrap { perspective: 1000px; height: 180px; cursor: pointer; }
+.card-inner { 
+  position: relative; width: 100%; height: 100%; 
+  transform-style: preserve-3d; transition: 0.6s cubic-bezier(0.4, 0, 0.2, 1); 
+}
+.card-wrap.flipped .card-inner { transform: rotateY(180deg); }
+.card-face {
+  position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+  border-radius: 24px; display: flex; flex-direction: column; 
+  align-items: center; justify-content: center; padding: 20px; text-align: center;
+  box-shadow: 0 8px 15px rgba(0,0,0,0.05);
+}
+.card-front { background: white; border: 1px solid #f1f5f9; color: var(--slate-800); }
+.card-back { background: var(--primary); color: white; transform: rotateY(180deg); }
+
+.del-btn {
+  margin-top: 15px; background: rgba(255,255,255,0.2); border: none;
+  padding: 6px 12px; border-radius: 10px; color: white; font-size: 11px; cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* ===== SHARE DECK SECTION ===== */
+#share-container {
+  max-width: 600px; margin: 0 auto; padding: 20px; display: none; width: 100%;
+  padding-bottom: 130px;
+}
+
+.share-hero {
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  border-radius: 28px; padding: 30px 25px; color: white; margin-bottom: 20px;
+  text-align: center;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+}
+.share-hero h2 { font-weight: 800; font-size: 26px; margin-bottom: 6px; }
+.share-hero p { opacity: 0.7; font-size: 14px; }
+
+.share-tabs {
+  display: flex; gap: 10px; margin-bottom: 20px;
+}
+.share-tab {
+  flex: 1; padding: 12px; border-radius: 16px; border: 2px solid #f1f5f9;
+  background: white; font-weight: 700; font-size: 14px; cursor: pointer;
+  transition: 0.2s; font-family: 'Plus Jakarta Sans', sans-serif; color: var(--slate-800);
+}
+.share-tab.active {
+  background: var(--slate-800); color: white; border-color: var(--slate-800);
+}
+
+/* Create Deck Panel */
+#create-deck-panel, #browse-decks-panel { display: none; }
+#create-deck-panel.active, #browse-decks-panel.active { display: block; }
+
+.deck-form {
+  background: white; border-radius: 24px; padding: 20px; margin-bottom: 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.05);
+}
+.deck-form h3 { font-weight: 700; margin-bottom: 15px; font-size: 16px; }
+
+.color-picker { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+.color-dot {
+  width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+  border: 3px solid transparent; transition: 0.2s;
+}
+.color-dot.selected { border-color: var(--slate-800); transform: scale(1.15); }
+
+.deck-cards-list { display: flex; flex-direction: column; gap: 8px; margin-top: 15px; }
+.deck-card-item {
+  display: flex; gap: 10px; align-items: center;
+  background: #f8faff; border-radius: 14px; padding: 12px;
+}
+.deck-card-item span { flex: 1; font-size: 14px; font-weight: 600; }
+.deck-card-item .sep { color: var(--slate-400); }
+.deck-card-item button {
+  background: #fee2e2; border: none; color: #ef4444; padding: 5px 10px;
+  border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 700;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.add-pair-row { display: flex; gap: 10px; margin-top: 12px; }
+.add-pair-row .gen-input { flex: 1; padding: 12px; }
+.add-pair-btn {
+  padding: 12px 16px; background: var(--primary); color: white;
+  border: none; border-radius: 14px; cursor: pointer; font-size: 18px; font-weight: 700;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.publish-btn {
+  width: 100%; padding: 16px; border-radius: 18px;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  color: white; border: none; font-weight: 800; font-size: 16px; cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif; margin-top: 15px;
+  box-shadow: 0 8px 20px rgba(99,102,241,0.3); transition: 0.2s;
+}
+.publish-btn:active { transform: scale(0.97); }
+.publish-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Shared Deck Cards */
+.shared-deck-card {
+  background: white; border-radius: 24px; padding: 20px; margin-bottom: 15px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.04);
+  transition: 0.2s;
+}
+.shared-deck-card:active { transform: scale(0.98); }
+.deck-header { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+.deck-icon {
+  width: 52px; height: 52px; border-radius: 16px;
+  display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0;
+}
+.deck-meta h3 { font-weight: 800; font-size: 17px; }
+.deck-meta p { font-size: 13px; color: var(--slate-500); margin-top: 2px; }
+.deck-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.deck-tag {
+  padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;
+  background: #f1f5f9; color: var(--slate-500);
+}
+.deck-actions { display: flex; gap: 10px; }
+.import-btn {
+  flex: 1; padding: 12px; border-radius: 14px;
+  background: var(--slate-800); color: white; border: none;
+  font-weight: 700; font-size: 14px; cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif; transition: 0.2s;
+}
+.import-btn:active { transform: scale(0.96); }
+.preview-btn {
+  padding: 12px 16px; border-radius: 14px;
+  background: #f1f5f9; color: var(--slate-800); border: none;
+  font-weight: 700; font-size: 14px; cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Preview Modal */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  display: none; align-items: flex-end; justify-content: center;
+  z-index: 500; padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: white; border-radius: 28px; width: 100%; max-width: 560px;
+  padding: 25px; max-height: 80vh; overflow-y: auto;
+}
+.modal-box h3 { font-weight: 800; font-size: 20px; margin-bottom: 15px; }
+.modal-card-list { display: flex; flex-direction: column; gap: 10px; }
+.modal-card-row {
+  display: flex; align-items: center; gap: 12px;
+  background: #f8faff; border-radius: 14px; padding: 14px;
+}
+.modal-card-row .term { font-weight: 700; flex: 1; }
+.modal-card-row .def { color: var(--slate-500); flex: 1; font-size: 14px; text-align: right; }
+.modal-close { 
+  width: 100%; padding: 15px; border-radius: 16px;
+  background: var(--slate-800); color: white; border: none;
+  font-weight: 700; font-size: 16px; cursor: pointer; margin-top: 10px;
+  font-family: 'Plus Jakarta Sans', sans-serif; display: block;
+}
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--slate-800); color: white; padding: 12px 24px; border-radius: 40px;
+  font-weight: 700; font-size: 14px; opacity: 0; transition: 0.3s; z-index: 999;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Quiz Section */
+#quiz-container { padding-bottom: 130px; }
+
+.quiz-question-card {
+  background: white; border-radius: 24px; padding: 24px; margin-bottom: 15px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.04);
+}
+.quiz-q-text { font-weight: 700; font-size: 16px; margin-bottom: 15px; }
+.quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.quiz-option-btn {
+  padding: 12px; border-radius: 14px; background: #f8faff; border: 2px solid #f1f5f9;
+  font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s;
+  font-family: 'Plus Jakarta Sans', sans-serif; color: var(--slate-800);
+}
+.quiz-option-btn.correct { background: #d1fae5; border-color: #10b981; color: #064e3b; }
+.quiz-option-btn.wrong { background: #fee2e2; border-color: #ef4444; color: #7f1d1d; }
+
+/* Loading Spinner */
+.spinner {
+  width: 24px; height: 24px; border: 3px solid rgba(255,255,255,0.3);
+  border-top-color: white; border-radius: 50%;
+  animation: spin 0.7s linear infinite; display: inline-block; vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Bottom Nav */
+.bottom-nav {
+  background: rgba(255,255,255,0.9); backdrop-filter: blur(20px);
+  padding: 15px 10px 30px 10px; position: fixed; bottom: 0; width: 100%;
+  display: none; justify-content: space-around; align-items: center;
+  border-top: 1px solid rgba(0,0,0,0.05); border-radius: 30px 30px 0 0;
+  box-shadow: 0 -10px 30px rgba(0,0,0,0.05);
+}
+.subj-tab {
+  width: 52px; height: 52px; border-radius: 17px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; cursor: pointer; transition: 0.3s;
+  background: #f1f5f9; border: none;
+}
+.subj-tab.active {
+  background: var(--active-color, var(--primary));
+  color: white; transform: translateY(-8px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+.section-label {
+  font-size: 11px; font-weight: 700; color: var(--slate-400);
+  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;
+}
+
+@media (max-width: 400px) {
+  .cards-grid { grid-template-columns: 1fr; }
+  .quiz-options { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Welcome Screen -->
+<div id="welcome-screen">
+  <div class="welcome-logo">F</div>
+  <h1 style="font-weight:800; font-size: 32px; letter-spacing: -1px;">FlashMind</h1>
+  <p style="color:var(--slate-500); margin-bottom:40px; font-size: 16px;">O'rganishni osonlashtiring</p>
+  <button class="start-btn" onclick="startStudy()">Start Study</button>
+</div>
+
+<!-- Navigation -->
+<nav id="main-nav" style="display:none">
+  <div class="nav-inner">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <div style="width:34px; height:34px; background:var(--slate-800); border-radius:10px; display:flex; align-items:center; justify-content:center; color:white; font-weight:800">F</div>
+      <span style="font-weight:800; font-size: 18px;">FlashMind</span>
+    </div>
+    <button onclick="location.reload()" style="background:#fee2e2; border:none; color:#ef4444; padding: 8px 15px; border-radius: 12px; cursor:pointer; font-weight:700; font-size: 13px;">Chiqish</button>
+  </div>
+</nav>
+
+<!-- Main Flashcard Container -->
+<div class="container" id="main-container">
+  <div class="hero" id="hero-box">
+    <h2 id="currentTitle" style="font-weight:800; font-size:28px; margin-bottom: 5px;">Ingliz tili</h2>
+    <p id="cardCount" style="opacity:0.9; font-size:14px; font-weight: 500;">0 ta karta mavjud</p>
+  </div>
+
+  <div class="gen-section">
+    <div class="gen-row">
+      <input class="gen-input" id="termInput" placeholder="Savol..."/>
+      <input class="gen-input" id="defInput" placeholder="Javob..."/>
+      <button class="save-btn" id="addBtn" onclick="addManualCard()">Kartani Qo'shish</button>
+    </div>
+  </div>
+
+  <div id="cardsGrid" class="cards-grid"></div>
+  <div id="emptyState" style="text-align:center; padding:40px; color:var(--slate-400); font-weight: 600;">Hali kartalar yo'q 👾</div>
+</div>
+
+<!-- Quiz Container -->
+<div class="container" id="quiz-container">
+  <div class="hero" style="background: #8b5cf6;">
+    <h2 style="font-weight:800; font-size:28px;">Mening Quizlarim</h2>
+    <div style="display:flex; justify-content:center; gap:15px; margin-top:10px;">
+      <span id="quizCount">0 ta savol</span>
+      <span id="scoreBoard" style="background:rgba(255,255,255,0.2); padding:2px 10px; border-radius:10px;">Ball: 0</span>
+    </div>
+  </div>
+
+  <div class="gen-section">
+    <p class="section-label">Yangi quiz qo'shish</p>
+    <input class="gen-input" id="qInput" placeholder="Savol..." style="margin-bottom:10px;"/>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+      <input class="gen-input" id="opt1" placeholder="✅ To'g'ri javob"/>
+      <input class="gen-input" id="opt2" placeholder="❌ Xato variant"/>
+      <input class="gen-input" id="opt3" placeholder="❌ Xato variant"/>
+      <input class="gen-input" id="opt4" placeholder="❌ Xato variant"/>
+    </div>
+    <button class="save-btn" onclick="addQuiz()" style="background:#8b5cf6; width:100%; margin-top:10px;">Quizni Saqlash</button>
+  </div>
+
+  <div id="quizList"></div>
+</div>
+
+<!-- Share / Community Container -->
+<div id="share-container">
+  <div class="share-hero">
+    <h2>🌐 Deck Marketplace</h2>
+    <p>Kartalar to'plamini yarating va ulashing</p>
+  </div>
+
+  <div class="share-tabs">
+    <button class="share-tab active" onclick="switchShareTab('create', this)">➕ Yaratish</button>
+    <button class="share-tab" onclick="switchShareTab('browse', this)">🔍 Ko'rish</button>
+  </div>
+
+  <!-- Create Deck Panel -->
+  <div id="create-deck-panel" class="active">
+    <div class="deck-form">
+      <h3>📦 Yangi Deck Yaratish</h3>
+      <input class="gen-input" id="deckName" placeholder="Deck nomi (masalan: A1 Ingliz so'zlari)"/>
+      <div style="margin-top:12px; margin-bottom:8px; font-size:13px; font-weight:700; color:var(--slate-500);">Rang tanlang:</div>
+      <div class="color-picker" id="colorPicker">
+        <div class="color-dot selected" style="background:#4f46e5" data-color="#4f46e5" onclick="selectColor(this)"></div>
+        <div class="color-dot" style="background:#10b981" data-color="#10b981" onclick="selectColor(this)"></div>
+        <div class="color-dot" style="background:#f59e0b" data-color="#f59e0b" onclick="selectColor(this)"></div>
+        <div class="color-dot" style="background:#ec4899" data-color="#ec4899" onclick="selectColor(this)"></div>
+        <div class="color-dot" style="background:#ef4444" data-color="#ef4444" onclick="selectColor(this)"></div>
+        <div class="color-dot" style="background:#8b5cf6" data-color="#8b5cf6" onclick="selectColor(this)"></div>
+        <div class="color-dot" style="background:#0ea5e9" data-color="#0ea5e9" onclick="selectColor(this)"></div>
+      </div>
+      <div style="margin-top:8px; margin-bottom:8px; font-size:13px; font-weight:700; color:var(--slate-500);">Emoji belgisi:</div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;" id="emojiPicker">
+        <span style="font-size:28px; cursor:pointer; padding:4px; border-radius:8px; border:2px solid #6366f1;" onclick="selectEmoji(this)">📚</span>
+        <span style="font-size:28px; cursor:pointer; padding:4px; border-radius:8px; border:2px solid transparent;" onclick="selectEmoji(this)">🧠</span>
+        <span style="font-size:28px; cursor:pointer; padding:4px; border-radius:8px; border:2px solid transparent;" onclick="selectEmoji(this)">🌍</span>
+        <span style="font-size:28px; cursor:pointer; padding:4px; border-radius:8px; border:2px solid transparent;" onclick="selectEmoji(this)">🔢</span>
+        <span style="font-size:28px; cursor:pointer; padding:4px; border-radius:8px; border:2px solid transparent;" onclick="selectEmoji(this)">⚗️</span>
+        <span style="font-size:28px; cursor:pointer; padding:4px; border-radius:8px; border:2px solid transparent;" onclick="selectEmoji(this)">🎵</span>
+        <span style="font-size:28px; cursor:pointer; padding:4px; border-radius:8px; border:2px solid transparent;" onclick="selectEmoji(this)">💡</span>
+        <span style="font-size:28px; cursor:pointer; padding:4px; border-radius:8px; border:2px solid transparent;" onclick="selectEmoji(this)">🚀</span>
+      </div>
+
+      <div class="add-pair-row">
+        <input class="gen-input" id="newPairTerm" placeholder="Savol / So'z"/>
+        <input class="gen-input" id="newPairDef" placeholder="Javob / Tarjima"/>
+        <button class="add-pair-btn" onclick="addCardToDeck()">+</button>
+      </div>
+
+      <div class="deck-cards-list" id="deckCardsList">
+        <div style="text-align:center; padding:15px; color:var(--slate-400); font-size:14px; font-weight:600;">Karta qo'shing 👆</div>
+      </div>
+
+      <button class="publish-btn" id="publishBtn" onclick="publishDeck()">🌐 Deckni Ulashish</button>
+    </div>
+  </div>
+
+  <!-- Browse Decks Panel -->
+  <div id="browse-decks-panel">
+    <div style="background:#f0fdf4; border-radius:18px; padding:14px 16px; margin-bottom:15px; display:flex; align-items:center; gap:10px;">
+      <span style="font-size:22px;">🌍</span>
+      <span style="font-size:13px; font-weight:600; color:#166534;">Barcha foydalanuvchilar ulashgan decklar shu yerda ko'rinadi!</span>
+    </div>
+    <div style="padding:5px 5px 10px; color:var(--slate-400); font-size:13px; font-weight:600;" id="loadingDecks"></div>
+    <div id="sharedDecksList" style="padding-bottom:20px;"></div>
+  </div>
+</div>
+
+<!-- Share Code Success Modal -->
+<div class="modal-overlay" id="shareCodeModal">
+  <div class="modal-box" style="text-align:center;">
+    <div style="font-size:48px; margin-bottom:10px;">🎉</div>
+    <h3 style="margin-bottom:6px;" id="shareCodeDeckName">Deck ulashildi!</h3>
+    <p style="color:var(--slate-500); font-size:14px; margin-bottom:20px;">Quyidagi kodni do'stlaringizga yuboring — ular "Ko'rish" bo'limida kodni kiritib deckinigizni qo'sha olishadi.</p>
+    <div style="background:#f8faff; border:2px dashed #6366f1; border-radius:18px; padding:18px; margin-bottom:20px;">
+      <div style="font-size:12px; font-weight:700; color:var(--slate-400); margin-bottom:6px; text-transform:uppercase; letter-spacing:1px;">Deck Kodi</div>
+      <div id="shareCodeDisplay" style="font-size:13px; font-weight:800; color:var(--primary); word-break:break-all; letter-spacing:1px;"></div>
+    </div>
+    <button class="modal-close" style="margin-bottom:10px; background:var(--primary);" onclick="copyShareCode()">📋 Kodni Nusxalash</button>
+    <button class="modal-close" style="background:var(--slate-800);" onclick="document.getElementById('shareCodeModal').classList.remove('open')">Yopish</button>
+  </div>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal-overlay" id="previewModal">
+  <div class="modal-box">
+    <h3 id="previewTitle">Deck Preview</h3>
+    <div class="modal-card-list" id="previewCardList"></div>
+    <button class="modal-close" onclick="closePreview()">Yopish</button>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast"></div>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav" id="bottom-tabs">
+  <button class="subj-tab active" style="--active-color:#4f46e5" onclick="switchSubject('english', '#4f46e5', this)">📖</button>
+  <button class="subj-tab" style="--active-color:#f59e0b" onclick="switchSubject('math', '#f59e0b', this)">📐</button>
+  <button class="subj-tab" style="--active-color:#10b981" onclick="switchSubject('science', '#10b981', this)">🔬</button>
+  <button class="subj-tab" style="--active-color:#ec4899" onclick="switchSubject('custom', '#ec4899', this)">✨</button>
+  <button class="subj-tab" style="--active-color:#8b5cf6" onclick="openSection('quiz', this)">📝</button>
+  <button class="subj-tab" style="--active-color:#0f172a" onclick="openSection('share', this)">🌐</button>
+</div>
+
+<script>
+// ===================== STATE =====================
+let currentSubject = 'english';
+let quizScore = 0;
+let newDeckCards = [];
+let selectedColor = '#4f46e5';
+let selectedEmoji = '📚';
+let currentSection = 'main';
+
+let decks = JSON.parse(localStorage.getItem('flashmind_decks')) || {
+  english: [{term: "Apple", definition: "Olma"}, {term: "Study", definition: "O'qish"}],
+  math: [], science: [], custom: []
+};
+
+let quizData = JSON.parse(localStorage.getItem('flashmind_quizzes')) || [];
+
+// ===================== STORAGE (npoint.io — shared by ALL users) =====================
+// Single central document holds all shared decks. Free, public, no login needed.
+const NPOINT_ID = 'cdc3178580cd270b6bb2';
+const NPOINT_URL = `https://api.npoint.io/${NPOINT_ID}`;
+
+async function npointGet() {
+  try {
+    const r = await fetch(NPOINT_URL);
+    if (!r.ok) return null;
+    const j = await r.json();
+    return Array.isArray(j.decks) ? j.decks : [];
+  } catch(e) { return null; }
+}
+
+async function npointSave(decksArr) {
+  try {
+    const r = await fetch(NPOINT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ decks: decksArr })
+    });
+    return r.ok;
+  } catch(e) { return false; }
+}
+
+// ===================== INIT =====================
+function startStudy() {
+  document.getElementById('welcome-screen').style.display = 'none';
+  document.getElementById('main-nav').style.display = 'block';
+  document.getElementById('main-container').style.display = 'block';
+  document.getElementById('bottom-tabs').style.display = 'flex';
+  renderCards();
+}
+
+function saveToLocal() {
+  localStorage.setItem('flashmind_decks', JSON.stringify(decks));
+  localStorage.setItem('flashmind_quizzes', JSON.stringify(quizData));
+}
+
+// ===================== SECTION SWITCHING =====================
+function hideAllSections() {
+  document.getElementById('main-container').style.display = 'none';
+  document.getElementById('quiz-container').style.display = 'none';
+  document.getElementById('share-container').style.display = 'none';
+}
+
+function openSection(section, el) {
+  hideAllSections();
+  document.querySelectorAll('.subj-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  currentSection = section;
+
+  if (section === 'quiz') {
+    document.getElementById('quiz-container').style.display = 'block';
+    renderQuizList();
+  } else if (section === 'share') {
+    document.getElementById('share-container').style.display = 'block';
+  }
+}
+
+function switchSubject(subj, color, el) {
+  hideAllSections();
+  currentSubject = subj;
+  currentSection = 'main';
+
+  document.querySelectorAll('.subj-tab').forEach(tab => tab.classList.remove('active'));
+  el.classList.add('active');
+
+  const hero = document.getElementById('hero-box');
+  hero.style.background = color;
+  document.getElementById('addBtn').style.background = color;
+
+  const titles = {english:'Ingliz tili', math:'Matematika', science:'Tabiiy fanlar', custom:'Mening kartalarim'};
+  document.getElementById('currentTitle').innerText = titles[subj];
+
+  document.getElementById('main-container').style.display = 'block';
+  renderCards();
+}
+
+// ===================== FLASHCARDS =====================
+function addManualCard() {
+  const term = document.getElementById('termInput').value.trim();
+  const def = document.getElementById('defInput').value.trim();
+  if (!term || !def) return;
+  decks[currentSubject].push({term, definition: def});
+  saveToLocal();
+  document.getElementById('termInput').value = '';
+  document.getElementById('defInput').value = '';
+  renderCards();
+  showToast('✅ Karta qo\'shildi!');
+}
+
+function renderCards() {
+  const grid = document.getElementById('cardsGrid');
+  const empty = document.getElementById('emptyState');
+  const currentCards = decks[currentSubject];
+  const colors = {english:'#4f46e5', math:'#f59e0b', science:'#10b981', custom:'#ec4899'};
+  const color = colors[currentSubject];
+
+  document.getElementById('cardCount').innerText = `${currentCards.length} ta karta mavjud`;
+  grid.innerHTML = '';
+
+  if (currentCards.length === 0) {
+    empty.style.display = 'block';
+  } else {
+    empty.style.display = 'none';
+    currentCards.forEach((card, index) => {
+      grid.innerHTML += `
+        <div class="card-wrap" onclick="this.classList.toggle('flipped')">
+          <div class="card-inner">
+            <div class="card-face card-front">
+              <div style="font-weight:800; font-size:18px">${escHtml(card.term)}</div>
+            </div>
+            <div class="card-face card-back" style="background:${color}">
+              <div style="font-weight:600; font-size:16px">${escHtml(card.definition)}</div>
+              <button class="del-btn" onclick="deleteCard(${index}, event)">O'chirish</button>
+            </div>
+          </div>
+        </div>`;
+    });
+  }
+}
+
+function deleteCard(index, event) {
+  event.stopPropagation();
+  decks[currentSubject].splice(index, 1);
+  saveToLocal();
+  renderCards();
+}
+
+// ===================== QUIZ =====================
+function addQuiz() {
+  const q = document.getElementById('qInput').value.trim();
+  const o1 = document.getElementById('opt1').value.trim();
+  const o2 = document.getElementById('opt2').value.trim();
+  const o3 = document.getElementById('opt3').value.trim();
+  const o4 = document.getElementById('opt4').value.trim();
+  if (!q || !o1 || !o2 || !o3 || !o4) { showToast('⚠️ Barcha maydonlarni to\'ldiring!'); return; }
+
+  quizData.push({q, options: [o1, o2, o3, o4], correct: o1, answered: false});
+  saveToLocal();
+  ['qInput','opt1','opt2','opt3','opt4'].forEach(id => document.getElementById(id).value = '');
+  renderQuizList();
+  showToast('✅ Quiz qo\'shildi!');
+}
+
+function renderQuizList() {
+  const list = document.getElementById('quizList');
+  document.getElementById('quizCount').innerText = `${quizData.length} ta savol`;
+  document.getElementById('scoreBoard').innerText = `Ball: ${quizScore}`;
+  list.innerHTML = '';
+  if (quizData.length === 0) {
+    list.innerHTML = '<div style="text-align:center; padding:40px; color:var(--slate-400); font-weight:600;">Hali quiz yo\'q 📝</div>';
+    return;
+  }
+  quizData.forEach((item, idx) => {
+    const shuffled = [...item.options].sort(() => Math.random() - 0.5);
+    list.innerHTML += `
+      <div class="quiz-question-card" id="qcard${idx}">
+        <div class="quiz-q-text">${idx+1}. ${escHtml(item.q)}</div>
+        <div class="quiz-options">
+          ${shuffled.map(opt => `
+            <button class="quiz-option-btn" onclick="answerQuiz(${idx}, '${escAttr(opt)}', '${escAttr(item.correct)}', this)">${escHtml(opt)}</button>
+          `).join('')}
+        </div>
+      </div>`;
+  });
+}
+
+function answerQuiz(idx, chosen, correct, btn) {
+  const card = document.getElementById('qcard' + idx);
+  const btns = card.querySelectorAll('.quiz-option-btn');
+  btns.forEach(b => b.disabled = true);
+  if (chosen === correct) {
+    btn.classList.add('correct');
+    quizScore++;
+    showToast('🎉 To\'g\'ri!');
+  } else {
+    btn.classList.add('wrong');
+    btns.forEach(b => { if (b.textContent === correct) b.classList.add('correct'); });
+    showToast('❌ Xato!');
+  }
+  document.getElementById('scoreBoard').innerText = `Ball: ${quizScore}`;
+}
+
+// ===================== SHARE DECK =====================
+function switchShareTab(tab, el) {
+  document.querySelectorAll('.share-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('create-deck-panel').classList.remove('active');
+  document.getElementById('browse-decks-panel').classList.remove('active');
+
+  if (tab === 'create') {
+    document.getElementById('create-deck-panel').classList.add('active');
+  } else {
+    document.getElementById('browse-decks-panel').classList.add('active');
+    loadSharedDecks();
+  }
+}
+
+function selectColor(el) {
+  document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedColor = el.dataset.color;
+}
+
+function selectEmoji(el) {
+  document.querySelectorAll('#emojiPicker span').forEach(e => e.style.borderColor = 'transparent');
+  el.style.borderColor = '#6366f1';
+  selectedEmoji = el.textContent.trim();
+}
+
+function addCardToDeck() {
+  const term = document.getElementById('newPairTerm').value.trim();
+  const def = document.getElementById('newPairDef').value.trim();
+  if (!term || !def) return;
+  newDeckCards.push({term, definition: def});
+  document.getElementById('newPairTerm').value = '';
+  document.getElementById('newPairDef').value = '';
+  renderNewDeckCards();
+}
+
+function renderNewDeckCards() {
+  const list = document.getElementById('deckCardsList');
+  if (newDeckCards.length === 0) {
+    list.innerHTML = '<div style="text-align:center; padding:15px; color:var(--slate-400); font-size:14px; font-weight:600;">Karta qo\'shing 👆</div>';
+    return;
+  }
+  list.innerHTML = newDeckCards.map((c, i) => `
+    <div class="deck-card-item">
+      <span>${escHtml(c.term)}</span>
+      <span class="sep">→</span>
+      <span>${escHtml(c.definition)}</span>
+      <button onclick="removeDeckCard(${i})">✕</button>
+    </div>`).join('');
+}
+
+function removeDeckCard(i) {
+  newDeckCards.splice(i, 1);
+  renderNewDeckCards();
+}
+
+async function publishDeck() {
+  const name = document.getElementById('deckName').value.trim();
+  if (!name) { showToast('⚠️ Deck nomini kiriting!'); return; }
+  if (newDeckCards.length < 2) { showToast('⚠️ Kamida 2 ta karta qo\'shing!'); return; }
+
+  const btn = document.getElementById('publishBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Yuklanmoqda...';
+
+  const deck = {
+    id: 'deck_' + Date.now(),
+    name,
+    color: selectedColor,
+    emoji: selectedEmoji,
+    cards: newDeckCards,
+    count: newDeckCards.length,
+    createdAt: new Date().toLocaleDateString('uz-UZ')
+  };
+
+  try {
+    // Fetch current decks from npoint
+    let allDecks = await npointGet();
+    if (allDecks === null) allDecks = [];
+
+    // Add new deck at top
+    allDecks.unshift(deck);
+    if (allDecks.length > 100) allDecks = allDecks.slice(0, 100);
+
+    // Save back to npoint
+    const ok = await npointSave(allDecks);
+    if (!ok) throw new Error('save failed');
+
+    showToast('🎉 Deck hammaga ulashildi!');
+    document.getElementById('deckName').value = '';
+    newDeckCards = [];
+    renderNewDeckCards();
+  } catch(e) {
+    showToast('❌ Xatolik! Internet tekshiring.');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '🌐 Deckni Ulashish';
+}
+
+function getLocalCache() {
+  try { return JSON.parse(localStorage.getItem('flashmind_shared_cache') || '[]'); } catch(e) { return []; }
+}
+function setLocalCache(arr) {
+  localStorage.setItem('flashmind_shared_cache', JSON.stringify(arr));
+}
+
+async function loadSharedDecks() {
+  const listEl = document.getElementById('sharedDecksList');
+  const loadingEl = document.getElementById('loadingDecks');
+  loadingEl.style.display = 'block';
+  loadingEl.innerHTML = '⏳ Yuklanmoqda...';
+  listEl.innerHTML = '';
+
+  const allDecks = await npointGet();
+
+  if (allDecks === null) {
+    loadingEl.innerHTML = '❌ Internet bilan muammo. Qayta urinib ko\'ring.';
+    return;
+  }
+
+  if (allDecks.length === 0) {
+    loadingEl.innerHTML = `<div style="text-align:center; padding:20px; color:var(--slate-400); font-weight:600; font-size:14px;">
+      Hali hech qanday deck yo'q 🚀<br>
+      <span style="font-size:12px; margin-top:5px; display:block;">Birinchi ulashuvchi siz bo'ling!</span>
+    </div>`;
+    return;
+  }
+
+  loadingEl.style.display = 'none';
+
+  allDecks.forEach(deck => {
+    const el = document.createElement('div');
+    el.className = 'shared-deck-card';
+    el.innerHTML = `
+      <div class="deck-header">
+        <div class="deck-icon" style="background:${deck.color}20; font-size:28px; width:52px; height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center;">${deck.emoji}</div>
+        <div class="deck-meta">
+          <h3>${escHtml(deck.name)}</h3>
+          <p>${deck.count} ta karta • ${deck.createdAt || ''}</p>
+        </div>
+      </div>
+      <div class="deck-actions">
+        <button class="preview-btn" onclick='previewDeck(${JSON.stringify(deck).replace(/'/g,"&#39;")})'>👁️ Ko'rish</button>
+        <button class="import-btn" style="background:${deck.color}" onclick='importDeck(${JSON.stringify(deck).replace(/'/g,"&#39;")})'>📥 Qo'shish</button>
+      </div>`;
+    listEl.appendChild(el);
+  });
+}
+
+// Keep addByShareCode as bonus fallback (not needed anymore but harmless)
+async function addByShareCode() {
+  showToast('ℹ️ Barcha decklar avtomatik ko\'rinadi!');
+}
+
+
+
+function previewDeck(deck) {
+  document.getElementById('previewTitle').textContent = deck.emoji + ' ' + deck.name;
+  const list = document.getElementById('previewCardList');
+  list.innerHTML = deck.cards.map(c => `
+    <div class="modal-card-row">
+      <span class="term">${escHtml(c.term)}</span>
+      <span style="color:var(--slate-400)">→</span>
+      <span class="def">${escHtml(c.definition)}</span>
+    </div>`).join('');
+  document.getElementById('previewModal').classList.add('open');
+}
+
+function closePreview() {
+  document.getElementById('previewModal').classList.remove('open');
+}
+
+function importDeck(deck) {
+  // Import into custom subject
+  deck.cards.forEach(c => {
+    decks['custom'].push({term: c.term, definition: c.definition});
+  });
+  saveToLocal();
+  showToast(`✅ ${deck.name} → Mening kartalarimga qo'shildi!`);
+}
+
+function copyShareCode() {
+  const code = document.getElementById('shareCodeDisplay').textContent;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(code).then(() => showToast('📋 Nusxalandi!'));
+  } else {
+    const el = document.createElement('textarea');
+    el.value = code; document.body.appendChild(el);
+    el.select(); document.execCommand('copy');
+    document.body.removeChild(el);
+    showToast('📋 Nusxalandi!');
+  }
+}
+
+// ===================== HELPERS =====================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+function escAttr(str) {
+  return String(str).replace(/'/g, "\\'").replace(/"/g, '\\"');
+}
+</script>
+</body>
+</html>
